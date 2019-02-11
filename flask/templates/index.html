@@ -13,13 +13,19 @@
             {{ message }}
           {% endif %}
         </p>
+  
         <form action="/post" method="post" class="form-group">
-          <label for="name">名前</label>
-          <input type="text" class="form-control" id="name" name="name" placeholder="Name">
+          <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+            <label for="date_field">基準日</label>
+            <input type="text" id="date_field", name="date_field", class="form-control datetimepicker-input" data-target="#datetimepicker1"/>
+            <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+              <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+            </div>
+          </div>
           <button type="submit" class="btn btn-default">送信する</button>
         </form>
 
-        {% if image_paths %}
+        {% if image_paths is not none %}
           <div class="image">
             <div class='row'>
               {% for path in image_paths %}
@@ -31,6 +37,19 @@
             </div>
           </div>
         {% endif %}
+
+        {% if predictions is not none %}
+          <div class="predictions">
+            <div class='row'>
+              {% for pred in predictions %}
+                <div class="col-md-6">
+                  {{ '降りそう' if pred == 1 else '降らなさそう' }}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
       </div>
     </div>
   </div>

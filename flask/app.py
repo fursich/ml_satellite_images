@@ -25,8 +25,8 @@ def hello_world():
 def post():
     title = "こんにちは"
     if request.method == 'POST':
-        current     = datetime.today()
-        target_date = calculate_target_date(current)
+        target_date = request.form['date_field']
+        target_date = validate_target_date(target_date)
 
         date_str_am = image_path_for(target_date, '09')
         date_str_pm = image_path_for(target_date, '21')
@@ -43,25 +43,30 @@ def post():
             }
         ]
 
-        image = io.imread(build_target_path(date_str_am))
-        print(build_target_path(date_str_am))
-        normalized_image = image/255.
-        X_nmf = best_nmf.transform(normalized_image)
-        X_pred = best_svc.predict(X_nmf)
-        print(X_pred)
+        images = [
+          io.imread(build_target_path(date_str_am)),
+          io.imread(build_target_path(date_str_pm))
+        ]
+        normalized_images = [image.ravel()/255. for image in images]
 
-        name = request.form['name']
-        # index.html をレンダリングする
-        return render_template('index.html',
-                               name=name, title=title, image_paths=image_paths)
+        target_nmf = best_nmf.transform(normalized_images)
+        target_pred = best_svc.predict(target_nmf)
+
+        return render_template('index.html', title=title, predictions=target_pred, image_paths=image_paths)
     else:
         # エラーなどでリダイレクトしたい場合はこんな感じで
         return redirect(url_for('index'))
 
-def calculate_target_date(current): # TODO: 10時以降で翌日午前の予測が出るようにする
-    if current.hour <= 22: # 21時の衛星画像が入る時刻（決め打ち）
-      current -= timedelta(days=1)
-    return current
+def validate_target_date(date=''): # TODO: 10時以降で翌日午前の予測が出るようにする
+    today = datetime.today().strftime("%Y/%m/%d") # 00:00:00に揃える
+    if date == '':
+      date = today
+
+    date  = datetime.strptime(date, "%Y/%m/%d")
+    today = datetime.strptime(today, "%Y/%m/%d")
+    if date >= today:
+      date = today - timedelta(days=1)
+    return date
 
 def image_path_for(target_date, hour):
     return target_date.strftime(f'%Y/%m/%d/{hour}/00/00')
