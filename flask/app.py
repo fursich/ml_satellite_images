@@ -13,6 +13,18 @@ with open('./data/weather_nmf_nmf.pickle', 'rb') as fp:
 with open('./data/weather_nmf_svc.pickle', 'rb') as fp:
     best_svc = pickle.load(fp)
 
+
+# TODO
+# routing 整理する
+# しきい値をいい感じにする(-0.9x程度？、またはrecall/precisionを表示？）
+# 現状だと、決定関数の値に+0.96足すといい感じ
+
+# 基準日に対して、翌日の午前午後の推定であることを明示する
+# 似ている日をいくつか例示するとさらによい？
+# 教育研究用であることを明記
+# URLを環境変数に隠蔽したい
+# デプロイなど
+
 @app.route('/')
 def hello_world():
     title = "ようこそ"
@@ -51,8 +63,9 @@ def post():
 
         target_nmf = best_nmf.transform(normalized_images)
         target_pred = best_svc.predict(target_nmf)
+        decision_data = best_svc.decision_function(target_nmf)
 
-        return render_template('index.html', title=title, predictions=target_pred, image_paths=image_paths)
+        return render_template('index.html', title=title, predictions=target_pred, decision_data=decision_data, image_paths=image_paths)
     else:
         # エラーなどでリダイレクトしたい場合はこんな感じで
         return redirect(url_for('index'))

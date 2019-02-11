@@ -47,6 +47,13 @@
                 </div>
               {% endfor %}
             </div>
+            <div class='row'>
+              {% for dec in decision_data %}
+                <div class="col-md-6">
+                  降りそう度: {{ dec }}
+                </div>
+              {% endfor %}
+            </div>
           </div>
         {% endif %}
 
