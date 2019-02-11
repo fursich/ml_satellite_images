@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block content %}
+  <!-- Form
+  ================================================== -->
+<div class="form">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <p class="lead">
+          {% if name %}
+            こんにちは {{ name }} さん
+          {% else %}
+            {{ message }}
+          {% endif %}
+        </p>
+        <form action="/post" method="post" class="form-group">
+          <label for="name">名前</label>
+          <input type="text" class="form-control" id="name" name="name" placeholder="Name">
+          <button type="submit" class="btn btn-default">送信する</button>
+        </form>
+
+        {% if image_paths %}
+          <div class="image">
+            <div class='row'>
+              {% for path in image_paths %}
+                <div class="col-md-6">
+                  {{ path['time'] }}
+                  <img src="{{ path['path'] }}" style="margin-top: 10px; vertical-align: bottom; width: 200px;">
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
