@@ -17,69 +17,59 @@ with open('./data/weather_nmf_svc.pickle', 'rb') as fp:
 
 
 # TODO
-# routing 整理する
 
 # 似ている日をいくつか例示するとさらによい？
 # モジュール化したい
-# 教育研究用であることを明記
 # URLを環境変数に隠蔽したい
 # デプロイなど
 
-@app.route('/')
-def hello_world():
-    title = "ようこそ"
-    message = '名前を入れてください'
-    # index.html をレンダリングする
-    target_date = datetime.strptime(datetime.today().strftime("%Y/%m/%d"), "%Y/%m/%d")
-    base_date = target_date - timedelta(days=1)
-
-    return render_template('index.html', title=title, target_date=target_date, base_date=base_date)
-
-@app.route('/post', methods=['GET', 'POST'])
-def post():
-    title = "こんにちは"
+@app.route('/', methods=['GET', 'POST'])
+def index():
     if request.method == 'POST':
         input_date = request.form['date_field']
         print(input_date)
         target_date = validate_target_date(input_date)
         base_date = target_date - timedelta(days=1)
-
-        date_str_am = image_path_for(base_date, '09')
-        date_str_pm = image_path_for(base_date, '21')
-        fetch_images_unless_exist(date_str_am, date_str_pm)
-
-
-        images = [
-          io.imread(build_target_path(date_str_am)),
-          io.imread(build_target_path(date_str_pm))
-        ]
-        normalized_images = [image.ravel()/255. for image in images]
-
-        target_nmf = best_nmf.transform(normalized_images)
-        confidence_scores = best_svc.decision_function(target_nmf) - THRESHOLD
-        predictions = [1 if score >= 0 else 0 for score in confidence_scores]
-
-        evaluations = [
-            {
-                'time':       "9時",
-                'timeframe':  "午前",
-                'image_path': build_target_path(date_str_am),
-                'confidence': "{:.2f}".format( confidence_scores[0] ),
-                'prediction':  predictions[0],
-            },
-            {
-                'time':       "21時",
-                'timeframe':  "午後",
-                'image_path': build_target_path(date_str_pm),
-                'confidence': "{:.2f}".format( confidence_scores[1] ),
-                'prediction':  predictions[1],
-            }
-        ]
-
-        return render_template('index.html', title=title, target_date=target_date.strftime("%Y/%m/%d"), base_date=base_date.strftime("%Y/%m/%d"), evaluations=evaluations)
+    elif request.method == 'GET':
+        # 00:00:00に揃える
+        target_date = datetime.strptime(datetime.today().strftime("%Y/%m/%d"), "%Y/%m/%d")
+        base_date = target_date - timedelta(days=1)
     else:
-        # エラーなどでリダイレクトしたい場合はこんな感じで
         return redirect(url_for('index'))
+
+    date_str_am = image_path_for(base_date, '09')
+    date_str_pm = image_path_for(base_date, '21')
+    fetch_images_unless_exist(date_str_am, date_str_pm)
+
+
+    images = [
+      io.imread(build_target_path(date_str_am)),
+      io.imread(build_target_path(date_str_pm))
+    ]
+    normalized_images = [image.ravel()/255. for image in images]
+
+    target_nmf = best_nmf.transform(normalized_images)
+    confidence_scores = best_svc.decision_function(target_nmf) - THRESHOLD
+    predictions = [1 if score >= 0 else 0 for score in confidence_scores]
+
+    evaluations = [
+        {
+            'time':       "9時",
+            'timeframe':  "午前",
+            'image_path': build_target_path(date_str_am),
+            'confidence': "{:.2f}".format( confidence_scores[0] ),
+            'prediction':  predictions[0],
+        },
+        {
+            'time':       "21時",
+            'timeframe':  "午後",
+            'image_path': build_target_path(date_str_pm),
+            'confidence': "{:.2f}".format( confidence_scores[1] ),
+            'prediction':  predictions[1],
+        }
+    ]
+
+    return render_template('index.html', target_date=target_date.strftime("%Y/%m/%d"), base_date=base_date.strftime("%Y/%m/%d"), evaluations=evaluations)
 
 def validate_target_date(date=''): # TODO: 10時以降で翌日午前の予測が出るようにする
     today = datetime.today().strftime("%Y/%m/%d") # 00:00:00に揃える
