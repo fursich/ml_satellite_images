@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="form">
-
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="#">ふとん干し太郎</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,12 +18,12 @@
 
         <div class="form-group">
           <div class="input-group date" id="datetimepicker" data-target-input="nearest">
-            <input type="text" id="date_field" placeholder="{{ target_date }}" name="date_field" class="form-control datetimepicker-input" data-target="#datetimepicker"/>
+            <input type="text" id="date_field" value="{{ target_date }}" placeholder="{{ target_date }}" name="date_field" class="form-control datetimepicker-input" data-target="#datetimepicker"/>
             <div class="input-group-append" data-target="#datetimepicker" data-toggle="datetimepicker">
               <div class="input-group-text"><i class="fa fa-calendar"></i></div>
             </div>
           </div>
-          <button type="submit" class="btn btn-primary">計算する</button>
+          <button type="submit" class="btn ml-1 btn-primary">計算する</button>
         </div>
       </form>
 
@@ -32,44 +31,51 @@
   </nav>
 
   <div class="container">
-    {% if evaluations is not none %}
-      <div class="row">
-        <div class="h4 my-5 col-md-12">
-          {{ target_date }}の濡れそう度数
-        </div>
-        {% for data in evaluations %}
-          <div class="card col-md-4 mx-1">
-            <div class="card-body text-center">
-              {{ target_date }} {{ data['time'] }}
-            </div>
-
-            <div class="card-body text-center">
-              <div>
-                濡れそう度 {{ data['confidence'] }}
-              </div>
-              <div class="my-2">
-                {{ ['降らなさそう', '降りそう'][data['prediction']] }}
-              </div>
-            </div>
+    <div class="content">
+      <div class="row offset-md-1">
+        {% if evaluations is not none %}
+          <div class="h5 mt-5 col-md-10">
+            {{ target_date }}の濡れそう度数
           </div>
-        {% endfor %}
+          {% for data in evaluations %}
+            <div class="card col-md-5 mx-1 my-1 bg-dark text-white">
+              <div class="card-body text-center">
+                {{ target_date }} {{ data['time'] }}
+              </div>
 
-        <div class="h5 my-5 col-md-12">
-          前日の衛星画像（赤外画像）
-        </div>
-        {% for data in evaluations %}
-          <div class="card col-md-4 mx-1">
-            <div class="card-body text-center">
-              {{ base_date }} {{ data['time'] }}
+              <div class="card-body text-center">
+                <div class="font-weight-bold">
+                  濡れそう度 {{ data['confidence'] }}
+                </div>
+                <div class="my-2">
+                  {{ ['降らなさそう', '降りそう'][data['prediction']] }}
+                </div>
+              </div>
             </div>
+          {% endfor %}
 
-            <img src="{{ data['image_path'] }}" class="card-image-top mx-auto mb-5" style="width: 200px;">
+          <div class="h5 mt-5 col-md-10">
+            前日の衛星画像（赤外画像）
           </div>
-        {% endfor %}
+          {% for data in evaluations %}
+            <div class="card col-md-5 my-1 mx-1">
+              <div class="card-body text-center">
+                {{ base_date }} {{ data['time'] }}
+              </div>
 
+              <img src="{{ data['image_path'] }}" class="card-image-top mx-auto mb-5" style="width: 150px;">
+            </div>
+          {% endfor %}
+
+        {% endif %}
+  
+        <div class="col-md-10 mt-3 mx-1">
+          <div class="font-weight-light text-right" style="font-size:50%;">
+            機械学習の研究対象として衛星画像を分析していますが、気象予報を提供するものではありません。<br/>
+            このサイト内のデータを元にした気象業務の利用は禁止します。
+          </div>
+        </div>
       </div>
-    {% endif %}
-
     </div>
   </div>
 </div>

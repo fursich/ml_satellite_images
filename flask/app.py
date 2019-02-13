@@ -41,8 +41,8 @@ def post():
     if request.method == 'POST':
         input_date = request.form['date_field']
         print(input_date)
-        base_date = validate_target_date(input_date)
-        target_date = base_date + timedelta(days=1)
+        target_date = validate_target_date(input_date)
+        base_date = target_date - timedelta(days=1)
 
         date_str_am = image_path_for(base_date, '09')
         date_str_pm = image_path_for(base_date, '21')
@@ -86,11 +86,10 @@ def validate_target_date(date=''): # TODO: 10時以降で翌日午前の予測�
     if date == '':
       date = today
 
-    print(date)
     date  = datetime.strptime(date, "%Y/%m/%d")
     today = datetime.strptime(today, "%Y/%m/%d")
-    if date >= today:
-      date = today - timedelta(days=1)
+    if date > today:
+      date = today
     return date
 
 def image_path_for(target_date, hour):
