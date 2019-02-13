@@ -2,4 +2,6 @@ cache
 
 flask/static
 flask/data
+flask/__pycache__
+flask/lib/__pycache__
 
