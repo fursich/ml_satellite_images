@@ -3,7 +3,7 @@ import requests
 import service
 from datetime import datetime, timedelta
 
-app = Flask(__name__)
+application = Flask(__name__)
 
 # TODO
 # 似ている日をいくつか例示するとさらによい？
@@ -11,7 +11,7 @@ app = Flask(__name__)
 # しきい値可変にしたい
 # デプロイなど
 
-@app.route('/', methods=['GET', 'POST'])
+@application.route('/', methods=['GET', 'POST'])
 def index():
 
     if request.method == 'POST':
@@ -57,5 +57,5 @@ def validate_target_date(date=''): # TODO: 10時以降で翌日午前の予測�
     return date
 
 if __name__ == '__main__':
-    app.run()
+    application.run()
 

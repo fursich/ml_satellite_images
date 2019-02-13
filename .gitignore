@@ -1,13 +1,15 @@
-cache
-
 static
 data
-__pycache__
-lib/__pycache__
-misc/env.sh
 
+misc/env.sh
+virt
+
+__pycache__
+cache
+lib/__pycache__
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+.ebextentions

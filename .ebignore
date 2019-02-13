@@ -1,6 +1,9 @@
+
 data/satellite_images
 data/images
+
 misc
+virt
 
 cache
 __pycache__
