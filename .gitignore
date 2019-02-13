@@ -1,8 +1,8 @@
 cache
 
-flask/static
-flask/data
-flask/__pycache__
-flask/lib/__pycache__
+static
+data
+__pycache__
+lib/__pycache__
 misc/env.sh
 

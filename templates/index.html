@@ -35,20 +35,20 @@
       <div class="row offset-md-1">
         {% if evaluations is not none %}
           <div class="h5 mt-5 col-md-10">
-            {{ target_date }}の濡れそう度数
+            {{ target_date }}
           </div>
           {% for data in evaluations %}
             <div class="card col-md-5 mx-1 my-1 bg-dark text-white">
               <div class="card-body text-center">
-                {{ target_date }} {{ data['time'] }}
+                {{ data['timeframe'] }}の予想
               </div>
 
               <div class="card-body text-center">
                 <div class="font-weight-bold">
-                  濡れそう度 {{ data['confidence'] }}
+                  降るかも指数 {{ data['confidence'] }}
                 </div>
                 <div class="my-2">
-                  {{ '降りそう' if data['prediction'] else '降らなさそう' }}
+                  {{ '降るかも' if data['prediction'] else '降らないかも' }}
                 </div>
               </div>
             </div>

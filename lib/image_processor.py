@@ -1,11 +1,13 @@
 import subprocess
+import os
 
 def fetch_and_save_images(image_path, target_path):
     url = build_image_url(image_path)
     run(convert_command(url, target_path))
 
 def build_image_url(date_str):
-    return f"https://storage.tenki.jp/archive/satellite/{date_str}/japan-near-small.jpg"
+    url_base = os.environ['SATELLITE_IMAGE_URL_BASE']
+    return url_base % date_str
 
 def convert_args():
     return " -shave 20x20 -colorspace linear-gray"
