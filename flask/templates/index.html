@@ -1,61 +1,75 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="form">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <p class="lead">
-          {% if name %}
-            こんにちは {{ name }} さん
-          {% else %}
-            {{ message }}
-          {% endif %}
-        </p>
-  
-        <form action="/post" method="post" class="form-group">
-          <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
-            <label for="date_field">基準日</label>
-            <input type="text" id="date_field", name="date_field", class="form-control datetimepicker-input" data-target="#datetimepicker1"/>
-            <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">ふとん干し太郎</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto mr-2">
+        <li class="nav-item">
+          基準日
+        </li>
+      </ul>
+
+      <form action="/post" method="post" class="form-inline my-2 my-lg-0">
+
+        <div class="form-group">
+          <div class="input-group date" id="datetimepicker" data-target-input="nearest">
+            <input type="text" id="date_field" placeholder="{{ target_date }}" name="date_field" class="form-control datetimepicker-input" data-target="#datetimepicker"/>
+            <div class="input-group-append" data-target="#datetimepicker" data-toggle="datetimepicker">
               <div class="input-group-text"><i class="fa fa-calendar"></i></div>
             </div>
           </div>
-          <button type="submit" class="btn btn-default">送信する</button>
-        </form>
+          <button type="submit" class="btn btn-primary">計算する</button>
+        </div>
+      </form>
 
-        {% if image_paths is not none %}
-          <div class="image">
-            <div class='row'>
-              {% for path in image_paths %}
-                <div class="col-md-6">
-                  {{ path['time'] }}
-                  <img src="{{ path['path'] }}" style="margin-top: 10px; vertical-align: bottom; width: 200px;">
-                </div>
-              {% endfor %}
+    </div>
+  </nav>
+
+  <div class="container">
+    {% if evaluations is not none %}
+      <div class="row">
+        <div class="h4 my-5 col-md-12">
+          {{ target_date }}の濡れそう度数
+        </div>
+        {% for data in evaluations %}
+          <div class="card col-md-4 mx-1">
+            <div class="card-body text-center">
+              {{ target_date }} {{ data['time'] }}
+            </div>
+
+            <div class="card-body text-center">
+              <div>
+                濡れそう度 {{ data['confidence'] }}
+              </div>
+              <div class="my-2">
+                {{ ['降らなさそう', '降りそう'][data['prediction']] }}
+              </div>
             </div>
           </div>
-        {% endif %}
+        {% endfor %}
 
-        {% if predictions is not none %}
-          <div class="predictions">
-            <div class='row'>
-              {% for pred in predictions %}
-                <div class="col-md-6">
-                  {{ '降りそう' if pred == 1 else '降らなさそう' }}
-                </div>
-              {% endfor %}
+        <div class="h5 my-5 col-md-12">
+          前日の衛星画像（赤外画像）
+        </div>
+        {% for data in evaluations %}
+          <div class="card col-md-4 mx-1">
+            <div class="card-body text-center">
+              {{ base_date }} {{ data['time'] }}
             </div>
-            <div class='row'>
-              {% for dec in decision_data %}
-                <div class="col-md-6">
-                  降りそう度: {{ dec }}
-                </div>
-              {% endfor %}
-            </div>
+
+            <img src="{{ data['image_path'] }}" class="card-image-top mx-auto mb-5" style="width: 200px;">
           </div>
-        {% endif %}
+        {% endfor %}
 
       </div>
+    {% endif %}
+
     </div>
   </div>
 </div>

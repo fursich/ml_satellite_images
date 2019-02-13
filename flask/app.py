@@ -6,6 +6,8 @@ import os
 from datetime import datetime, timedelta
 from skimage import io
 
+THRESHOLD = -0.96
+
 app = Flask(__name__)
 with open('./data/weather_nmf_nmf.pickle', 'rb') as fp:
     best_nmf = pickle.load(fp)
@@ -16,10 +18,7 @@ with open('./data/weather_nmf_svc.pickle', 'rb') as fp:
 
 # TODO
 # routing 整理する
-# しきい値をいい感じにする(-0.9x程度？、またはrecall/precisionを表示？）
-# 現状だと、決定関数の値に+0.96足すといい感じ
 
-# 基準日に対して、翌日の午前午後の推定であることを明示する
 # 似ている日をいくつか例示するとさらによい？
 # モジュール化したい
 # 教育研究用であることを明記
@@ -31,30 +30,24 @@ def hello_world():
     title = "ようこそ"
     message = '名前を入れてください'
     # index.html をレンダリングする
-    return render_template('index.html',
-                           message=message, title=title)
+    target_date = datetime.strptime(datetime.today().strftime("%Y/%m/%d"), "%Y/%m/%d")
+    base_date = target_date - timedelta(days=1)
+
+    return render_template('index.html', title=title, target_date=target_date, base_date=base_date)
 
 @app.route('/post', methods=['GET', 'POST'])
 def post():
     title = "こんにちは"
     if request.method == 'POST':
-        target_date = request.form['date_field']
-        target_date = validate_target_date(target_date)
+        input_date = request.form['date_field']
+        print(input_date)
+        base_date = validate_target_date(input_date)
+        target_date = base_date + timedelta(days=1)
 
-        date_str_am = image_path_for(target_date, '09')
-        date_str_pm = image_path_for(target_date, '21')
+        date_str_am = image_path_for(base_date, '09')
+        date_str_pm = image_path_for(base_date, '21')
         fetch_images_unless_exist(date_str_am, date_str_pm)
 
-        image_paths = [
-            {
-                'time': date_str_am,
-                'path': build_target_path(date_str_am),
-            },
-            {
-                'time': date_str_pm,
-                'path': build_target_path(date_str_pm),
-            }
-        ]
 
         images = [
           io.imread(build_target_path(date_str_am)),
@@ -63,10 +56,27 @@ def post():
         normalized_images = [image.ravel()/255. for image in images]
 
         target_nmf = best_nmf.transform(normalized_images)
-        target_pred = best_svc.predict(target_nmf)
-        decision_data = best_svc.decision_function(target_nmf)
+        confidence_scores = best_svc.decision_function(target_nmf) - THRESHOLD
+        predictions = [1 if score >= 0 else 0 for score in confidence_scores]
 
-        return render_template('index.html', title=title, predictions=target_pred, decision_data=decision_data, image_paths=image_paths)
+        evaluations = [
+            {
+                'time':       "9時",
+                'timeframe':  "午前",
+                'image_path': build_target_path(date_str_am),
+                'confidence': "{:.2f}".format( confidence_scores[0] ),
+                'prediction':  predictions[0],
+            },
+            {
+                'time':       "21時",
+                'timeframe':  "午後",
+                'image_path': build_target_path(date_str_pm),
+                'confidence': "{:.2f}".format( confidence_scores[1] ),
+                'prediction':  predictions[1],
+            }
+        ]
+
+        return render_template('index.html', title=title, target_date=target_date.strftime("%Y/%m/%d"), base_date=base_date.strftime("%Y/%m/%d"), evaluations=evaluations)
     else:
         # エラーなどでリダイレクトしたい場合はこんな感じで
         return redirect(url_for('index'))
@@ -76,6 +86,7 @@ def validate_target_date(date=''): # TODO: 10時以降で翌日午前の予測�
     if date == '':
       date = today
 
+    print(date)
     date  = datetime.strptime(date, "%Y/%m/%d")
     today = datetime.strptime(today, "%Y/%m/%d")
     if date >= today:
