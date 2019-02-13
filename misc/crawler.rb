@@ -1,17 +1,14 @@
 require 'mini_magick'
 
-# start_date = DateTime.new(2013, 1, 1,  0, 0, 0)
 MAX_ERROR_COUNT = 3
 DELAY_PER_TRIAL = 20
 
 start_date = DateTime.new(2013, 1, 1, 9, 0, 0)
-end_date   = DateTime.new(2013, 3, 4, 23, 0, 1)
-# start_date = DateTime.new(2018, 6, 26, 9, 0, 0)
-# end_date   = DateTime.new(2019, 2, 1, 23, 0, 1)
+end_date   = DateTime.new(2019, 2, 1, 23, 0, 1)
 
-base_url = "https://storage.tenki.jp/archive/satellite/%s/japan-near-small.jpg"
-base_filename = 'images2/%s.jpg'
-base_cropped_filename = 'crop2/%s.jpg'
+base_url = ENV['SATELLITE_IMAGE_URL_BASE']
+base_filename = 'data/images/%s.jpg'
+base_cropped_filename = 'crop/%s.jpg'
 
 start_date.step(end_date, step=0.5) do |date|
 
