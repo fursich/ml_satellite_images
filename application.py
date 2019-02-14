@@ -7,9 +7,7 @@ application = Flask(__name__)
 
 # TODO
 # 似ている日をいくつか例示するとさらによい？
-# URLを環境変数に隠蔽したい
 # しきい値可変にしたい
-# デプロイなど
 
 @application.route('/', methods=['GET', 'POST'])
 def index():
@@ -46,14 +44,16 @@ def index():
     return render_template('index.html', target_date=target_date.strftime("%Y/%m/%d"), base_date=base_date.strftime("%Y/%m/%d"), evaluations=evaluations)
 
 def validate_target_date(date=''): # TODO: 10時以降で翌日午前の予測が出るようにする
-    today = datetime.today().strftime("%Y/%m/%d") # 00:00:00に揃える
-    if date == '':
-        date = today
+    today = date.today()
+    latest_date   = datetime(today.year, today.month, today.day)
+    earliest_date = datetime(2013,1,1)
 
-    date  = datetime.strptime(date, "%Y/%m/%d")
-    today = datetime.strptime(today, "%Y/%m/%d")
-    if date > today:
+    if date == '' or date > today:
         date = today
+    elif date < earliest_date:
+        date = earliest_date
+    else:
+        date  = datetime.strptime(date, "%Y/%m/%d")
     return date
 
 if __name__ == '__main__':
