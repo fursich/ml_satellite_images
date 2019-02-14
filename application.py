@@ -43,17 +43,21 @@ def index():
 
     return render_template('index.html', target_date=target_date.strftime("%Y/%m/%d"), base_date=base_date.strftime("%Y/%m/%d"), evaluations=evaluations)
 
-def validate_target_date(date=''): # TODO: 10時以降で翌日午前の予測が出るようにする
-    today = date.today()
+def validate_target_date(date_str=''): # TODO: 10時以降で翌日午前の予測が出るようにする
+    today         = datetime.today()
     latest_date   = datetime(today.year, today.month, today.day)
     earliest_date = datetime(2013,1,1)
 
-    if date == '' or date > today:
-        date = today
-    elif date < earliest_date:
-        date = earliest_date
+    if date_str == '':
+        date = latest_date
     else:
-        date  = datetime.strptime(date, "%Y/%m/%d")
+        date  = datetime.strptime(date_str, "%Y/%m/%d")
+
+    if date < earliest_date:
+        date = earliest_date
+    if date > latest_date:
+        date = earliest_date
+
     return date
 
 if __name__ == '__main__':
