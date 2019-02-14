@@ -7,6 +7,7 @@ virt
 __pycache__
 cache
 lib/__pycache__
+.ipynb_checkpoints
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
